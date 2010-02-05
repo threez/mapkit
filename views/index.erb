@@ -1,0 +1,106 @@
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		<title>VARTA Guide 2.1</title>
+		<style type="text/css" media="screen"><!--
+		  body { background: url(images/gradient.jpg) repeat-x; }
+			#box { width: 800px; margin: 18px auto 0; }
+			#title { width: 800px; margin: 0px; padding: 30px 0px 30px 0px; }
+			#map { width: 650px; height: 500px; border: solid 1px #999; }
+			#list { float: right; width: 130px; margin: 0px; padding: 0px; border: solid 1px #999; list-style: none;}
+			#list li { margin: 0px; padding: 0px; }
+			#list li a { padding: 10px; background: url(images/gradient.jpg) center repeat-x; height: 50px; width: 110px; display: block; }
+			p { color: #666; font-size: 16px; font-family: "Lucida Grande", Arial, sans-serif; font-weight: normal; margin-top: 0; }
+			h1 { color: #778fbd; font-size: 20px; font-family: "Lucida Grande", Arial, sans-serif; font-weight: 500; line-height: 32px; margin-top: 4px; }
+			h2 { color: #778fbd; font-size: 18px; font-family: "Lucida Grande", Arial, sans-serif; font-weight: normal; margin: 0.83em 0 0; }
+			h3 { color: #666; font-size: 60px; font-family: "Lucida Grande", Arial, sans-serif; font-weight: bold; text-align: center; letter-spacing: -1px; width: auto; }
+			h4 { font-weight: bold; text-align: center; margin: 1.33em 0; }
+			a { color: #666; text-decoration: underline; }
+		--></style>
+		
+		<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAnfs7bKE82qgb3Zc2YyS-oBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSySz_REpPq-4WZA27OwgbtyR3VcA&sensor=false&hl=de"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+      var map = null, 
+          inovex_hq = null,
+          inovex_hq_marker = null,
+          rubylayer = null;
+      var inovex_text = "<img src='http://www.inovex.de/images/inovex_logo.gif'><br/><b>Here is the inovex <u>HQ</u></b><br/><br/><a href='http://inovex.de'>inovex</a>";
+      var aral = new GLatLng(48.901,8.666);
+      var aral_marker = new GMarker(aral);
+      var aral_text = "<b>Aral!</b>";
+      var ggeo = new GClientGeocoder();
+    
+      function displayAndCenter(map, position, text) {
+        map.panTo(position);
+        map.openInfoWindowHtml(position, text);
+        return false;
+      }
+      
+      function start() {
+        ggeo.getLatLng("Karlsruherstr. 71, Pforzheim", function(point) {
+          inovex_hq = point;
+          inovex_hq_marker = new GMarker(inovex_hq);
+          
+          initialize();
+        });
+      }
+      
+      function initialize() {
+        if (GBrowserIsCompatible()) {
+          map = new GMap2(document.getElementById("map"));
+          
+          // world bounds
+          var world = new GLatLngBounds(new GLatLng(180, -90), new GLatLng(-180, 90));
+          
+          // copyrights
+          var right = new GCopyright(1000000, world, 0, "BLAH")
+          var copyrights = new GCopyrightCollection("RubyLayer");
+          copyrights.addCopyright(right);
+          
+          // new layer
+          rubylayer = new GTileLayerOverlay(
+            new GTileLayer(copyrights, 0, 21, {
+              tileUrlTemplate: "{Z}/{X}/{Y}.png", 
+              isPng: true,
+              opacity: 1
+            })
+          );
+        
+          map.addOverlay(inovex_hq_marker);
+          map.addOverlay(aral_marker);
+          
+          map.setCenter(inovex_hq, 14);
+          map.addControl(new GLargeMapControl());
+          map.addControl(new GMapTypeControl());
+        
+          GEvent.addListener(inovex_hq_marker, "click", function() {
+            displayAndCenter(map, inovex_hq, inovex_text);
+          });
+        
+          GEvent.addListener(aral_marker, "click", function() {
+            displayAndCenter(map, aral, aral_text);
+          });
+          map.addOverlay(rubylayer);
+        }
+      }
+    </script>
+	</head>
+
+  <body onload="start()" onunload="GUnload()">
+		<div id="box">
+			<h3 id="title">VARTA Guide 2.1</h3>
+			
+    	<ul id="list">
+        <li><a href="#" onClick="displayAndCenter(map, inovex_hq, inovex_text);">inovex HQ</a></li>
+        <li><a href="#" onClick="displayAndCenter(map, aral, aral_text);">Aral</a></li>
+    	</ul>
+    	<div id="map"></div>
+		</div>
+		
+	</body>
+
+</html>
