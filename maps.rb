@@ -5,10 +5,55 @@ module Maps
   INITIAL_RESOLUTION = 2 * Math::PI * 6378137 / TILE_SIZE
   ORIGIN_SHIFT = 2 * Math::PI * 6378137 / 2.0
   
+  class Point
+    attr_accessor :lat, :lng
+  
+    def initialize(lat, lng)
+      @lat, @lng = lat, lng
+    end
+    
+    # returns true if point is in bounding_box
+    def in?(bounding_box)
+      top, left, bottom, right = bounding_box.coords
+      (left..right) === lat && (top..bottom) === lng
+    end
+    
+    # returns relative x and y for point in bounding_box
+    def pixel(bounding_box)
+      top, left, bottom, right = bounding_box.coords
+      [
+        (lat - left) / ((right - left) / Maps::TILE_SIZE),
+        (lng - top) / ((bottom - top) / Maps::TILE_SIZE)
+      ]
+    end
+  end
+  
+  class BoundingBox
+    attr_accessor :top, :left, :bottom, :right
+    
+    def initialize(top, left, bottom, right)
+      @top, @left, @bottom, @right = top, left, bottom, right
+    end
+    
+    def coords
+      [@top, @left, @bottom, @right]
+    end
+
+    # returns array with width and height of sspn
+    def sspn
+      [(@right - @left) / 2, (@bottom - @top) / 2]
+    end
+
+    # returns lat/lnt of coords
+    def center
+      [@left + (@right - @left) / 2, @top + (@bottom - @top) / 2]
+    end
+  end
+  
   # return array of lat/lng for google tiles
-  def self.tile(gx, gy, zoom)
+  def self.bounding_box(gx, gy, zoom)
     tx, ty = google_tile(gx, gy, zoom)
-    tile_latlng_bounds(tx, ty, zoom)
+    BoundingBox.new(*tile_latlng_bounds(tx, ty, zoom))
   end
   
   # converts TMS tile coordinates to Google Tile coordinates

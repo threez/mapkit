@@ -1,7 +1,6 @@
 require "rubygems"
 require "sinatra"
 require "png"
-require "maps"
 require "google"
 
 get "/" do
@@ -11,35 +10,15 @@ end
 # draws star on canvas with passed color and position
 def star(canvas, x, y, color, size = 5)
   x, y = x.to_i, y.to_i
-  canvas.line(x-size, y, x+size, y, PNG::Color::Red)
-  canvas.line(x, y-size, x, y+size, PNG::Color::Red)
-end
-
-# returns true if point is in coords
-def in?(point, coords)
-  top, left, bottom, right = coords
-  (left..right) === point[0] && (top..bottom) === point[1]
-end
-
-# returns relative x and y for point in coords
-def point2pixel(point, coords)
-  top, left, bottom, right = coords
-  [
-    (point[0] - left) / ((right - left) / Maps::TILE_SIZE),
-    (point[1] - top) / ((bottom - top) / Maps::TILE_SIZE)
-  ]
-end
-
-# returns array with width and height of sspn
-def coords2sspn(coords)
-  top, left, bottom, right = coords
-  [(right - left) / 2, (bottom - top) / 2]
-end
-
-# returns lat/lnt of coords
-def center(coords)
-  top, left, bottom, right = coords  
-  [left + (right - left) / 2, top + (bottom - top) / 2]
+  if (0...Maps::TILE_SIZE) === x-size &&
+     (0...Maps::TILE_SIZE) === x+size &&
+     (0...Maps::TILE_SIZE) === y-size &&
+     (0...Maps::TILE_SIZE) === y+size
+    canvas.line(x-size, y, x+size, y, PNG::Color::Red)
+    canvas.line(x, y-size, x, y+size, PNG::Color::Red)
+  else
+    canvas[x, y] = PNG::Color::Red
+  end
 end
 
 empty_png = File.read("empty.png")
@@ -52,17 +31,16 @@ get "/:z/:x/:y.png" do
   image = empty_png
   
   # find map coords
-  coords = Maps.tile(params[:x].to_i, params[:y].to_i, params[:z].to_i)
+  bounding_box = Maps.bounding_box(params[:x].to_i, params[:y].to_i, params[:z].to_i)
   
-  for point in Google.search_position(TERM, center(coords), coords2sspn(coords)) do
+  for point in Google.search_in_bounding_box(TERM, bounding_box) do
     # is point in requested tile?
-    if in?(point, coords)
+    if point.in?(bounding_box)
       # create image canvas
       canvas = PNG::Canvas.new(Maps::TILE_SIZE, Maps::TILE_SIZE)
     
       # draw star at position
-      x, y = point2pixel(point, coords)
-      p "star@#{point.inspect} for #{coords.inspect} IMG: #{x}, #{y}"
+      x, y = point.pixel(bounding_box)
       star(canvas, x, y, PNG::Color::Red)
     
       # dump png

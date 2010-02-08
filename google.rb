@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'httparty'
+require 'maps'
 
 class Google
   include HTTParty
@@ -17,7 +18,9 @@ class Google
     end
   end
   
-  def self.search_position(term, point, sspn)
-    search(term, point, sspn).map { |i| [i["lng"].to_f, i["lat"].to_f] }
+  def self.search_in_bounding_box(term, bounding_box)
+    search(term, bounding_box.center, bounding_box.sspn).map do |i| 
+      Maps::Point.new(i["lng"].to_f, i["lat"].to_f)
+    end
   end
 end
