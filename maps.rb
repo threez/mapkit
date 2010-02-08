@@ -19,12 +19,17 @@ module Maps
     end
     
     # returns relative x and y for point in bounding_box
-    def pixel(bounding_box)
+    def pixel(bounding_box, reverse = false)
       top, left, bottom, right = bounding_box.coords
-      [
-        (lat - left) / ((right - left) / Maps::TILE_SIZE),
-        (lng - top) / ((bottom - top) / Maps::TILE_SIZE)
-      ]
+      
+      ws = (right - left) / Maps::TILE_SIZE
+      hs = (bottom - top) / Maps::TILE_SIZE
+      
+      if reverse
+        [(@lat - left) / ws, (@lng - top) / hs]
+      else
+        [(@lat - left) / ws, TILE_SIZE - (@lng - top) / hs]
+      end
     end
   end
   
