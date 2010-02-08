@@ -22,8 +22,8 @@ module Maps
     def pixel(bounding_box, reverse = false)
       top, left, bottom, right = bounding_box.coords
       
-      ws = (right - left) / Maps::TILE_SIZE
-      hs = (bottom - top) / Maps::TILE_SIZE
+      ws = (right - left) / TILE_SIZE
+      hs = (bottom - top) / TILE_SIZE
       
       if reverse
         [(@lat - left) / ws, (@lng - top) / hs]
@@ -34,10 +34,10 @@ module Maps
   end
   
   class BoundingBox
-    attr_accessor :top, :left, :bottom, :right
+    attr_accessor :top, :left, :bottom, :right, :zoom
     
-    def initialize(top, left, bottom, right)
-      @top, @left, @bottom, @right = top, left, bottom, right
+    def initialize(top, left, bottom, right, zoom)
+      @top, @left, @bottom, @right, @zoom = top, left, bottom, right, zoom
     end
     
     # returns array of top, left, bottom, right
@@ -54,12 +54,30 @@ module Maps
     def center
       [@left + (@right - @left) / 2, @top + (@bottom - @top) / 2]
     end
+    
+    # grow bounding box by percentage
+    def grow!(percent)
+      lat = percent * ((@right - @left) / 100)
+      lng = percent * ((@bottom - @top) / 100)
+      @top -= lat
+      @left -= lng
+      @bottom += lat
+      @right += lng
+    end
+    
+    # grow bounding box by percentage and return new bounding box
+    def grow(percent)
+      copy = self.clone
+      copy.grow!(percent)
+      copy
+    end
   end
   
   # return array of lat/lng for google tiles
   def self.bounding_box(gx, gy, zoom)
     tx, ty = google_tile(gx, gy, zoom)
-    BoundingBox.new(*tile_latlng_bounds(tx, ty, zoom))
+    top, left, bottom, right = tile_latlng_bounds(tx, ty, zoom)
+    BoundingBox.new(top, left, bottom, right, zoom)
   end
   
   # converts TMS tile coordinates to Google Tile coordinates
@@ -84,13 +102,13 @@ module Maps
     [minx, miny, maxx, maxy]
   end
   
-  # converts XY point from Spherical Mercator EPSG:900913 to lat/lon in WGS84 Datum
+  # converts XY point from Spherical Mercator EPSG:900913 to lat/lng in WGS84 Datum
   def self.meters2latlng(mx, my)
-    lon = (mx / ORIGIN_SHIFT) * 180.0
+    lng = (mx / ORIGIN_SHIFT) * 180.0
     lat = (my / ORIGIN_SHIFT) * 180.0
 
     lat = 180 / Math::PI * (2 * Math.atan( Math.exp( lat * RADIANT)) - HALF_PI)
-    [lat, lon]
+    [lat, lng]
   end
 
   # converts pixel coordinates in given zoom level of pyramid to EPSG:900913

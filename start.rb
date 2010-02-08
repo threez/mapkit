@@ -19,36 +19,36 @@ get "/:z/:x/:y.png" do
   
   # find map bounding box
   bounding_box = Maps.bounding_box(params[:x].to_i, params[:y].to_i, params[:z].to_i)
+  search_box = bounding_box.grow(20)
   
-  results = Google.search_in_bounding_box(TERM, bounding_box)
+  results = Google.search_in_bounding_box(TERM, search_box)
   
   unless results.empty?
     # create image canvas
-    
-    image = GD2::Image.new(Maps::TILE_SIZE, # + ICON_SIZE * 2, # add icon size border
-                           Maps::TILE_SIZE) # + ICON_SIZE * 2) # and crop out later
+    canvas = GD2::Image.new(Maps::TILE_SIZE, Maps::TILE_SIZE)
                            
     # make image transparent
-    image.save_alpha = true
-    image.draw do |context|
+    canvas.save_alpha = true
+    canvas.draw do |context|
       context.color = GD2::Color::TRANSPARENT
       context.fill
     end
     
     for point in results do
       # is point in requested tile?
-      if point.in?(bounding_box)
+      #if point.in?(bounding_box)
         # draw star at position
         x, y = point.pixel(bounding_box)
         x, y = x - 3, y - 20 # position icon image to peak point
         
         # copy gas image
-        image.copy_from(GAS_STATION, x, y, 0, 0, ICON_SIZE, ICON_SIZE)
-      end
+        canvas.copy_from(GAS_STATION, x, y, 0, 0, ICON_SIZE, ICON_SIZE)
+      #end
     end
     
     # dump png
-    image = image.png
+    #canvas.crop! *Maps::CROP_DIMENSIONS
+    image = canvas.png
   end
 
   image
