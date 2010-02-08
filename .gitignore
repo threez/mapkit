@@ -1,1 +1,4 @@
 .DS_Store
+database
+test.sql
+database.log

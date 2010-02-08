@@ -2,9 +2,18 @@ require "rubygems"
 require "sinatra"
 require "gd2"
 require "google"
+require "sequel"
 
 get "/" do
   erb :index
+end
+
+DB = Sequel.postgres "varta", :user => "varta", :passwd => "varta"
+
+def points(bounding_box)
+  top, left, bottom, right = bounding_box.coords
+  data = DB[:points_of_interest].where(:lng => (left..right), :lat => (top..bottom)).all
+  data.map { |row| Maps::Point.new(row[:lng], row[:lat]) }
 end
 
 TERM = "Tankstelle"
@@ -21,9 +30,10 @@ get "/:z/:x/:y.png" do
   bounding_box = Maps.bounding_box(params[:x].to_i, params[:y].to_i, params[:z].to_i)
   search_box = bounding_box.grow(20)
   
-  results = Google.search_in_bounding_box(TERM, search_box)
+  #points = Google.search_in_bounding_box(TERM, search_box)
+  points = points(search_box)
   
-  unless results.empty?
+  unless points.empty?
     # create image canvas
     canvas = GD2::Image.new(Maps::TILE_SIZE, Maps::TILE_SIZE)
                            
@@ -34,20 +44,16 @@ get "/:z/:x/:y.png" do
       context.fill
     end
     
-    for point in results do
-      # is point in requested tile?
-      #if point.in?(bounding_box)
-        # draw star at position
-        x, y = point.pixel(bounding_box)
-        x, y = x - 3, y - 20 # position icon image to peak point
-        
-        # copy gas image
-        canvas.copy_from(GAS_STATION, x, y, 0, 0, ICON_SIZE, ICON_SIZE)
-      #end
+    for point in points do
+      # draw star at position
+      x, y = point.pixel(bounding_box)
+      x, y = x - 3, y - 20 # position icon image to peak point
+      
+      # copy gas image
+      canvas.copy_from(GAS_STATION, x, y, 0, 0, ICON_SIZE, ICON_SIZE)
     end
     
     # dump png
-    #canvas.crop! *Maps::CROP_DIMENSIONS
     image = canvas.png
   end
 
