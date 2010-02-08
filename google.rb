@@ -5,7 +5,7 @@ require 'maps'
 class Google
   include HTTParty
   base_uri "www.google.com"
-  default_params :hl => :de, :v => "1.0"
+  default_params :hl => :de, :v => "1.0", :rsv => :large
   format :json
   
   def self.search(term, point, sspn)

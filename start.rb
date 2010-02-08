@@ -30,23 +30,27 @@ get "/:z/:x/:y.png" do
   # use default empty image
   image = empty_png
   
-  # find map coords
+  # find map bounding box
   bounding_box = Maps.bounding_box(params[:x].to_i, params[:y].to_i, params[:z].to_i)
   
-  for point in Google.search_in_bounding_box(TERM, bounding_box) do
-    # is point in requested tile?
-    if point.in?(bounding_box)
-      # create image canvas
-      canvas = PNG::Canvas.new(Maps::TILE_SIZE, Maps::TILE_SIZE)
-    
-      # draw star at position
-      x, y = point.pixel(bounding_box)
-      star(canvas, x, y, PNG::Color::Red)
-    
-      # dump png
-      image = PNG.new(canvas).to_blob
-    end
-  end
+  results = Google.search_in_bounding_box(TERM, bounding_box)
   
+  unless results.empty?
+    # create image canvas
+    canvas = PNG::Canvas.new(Maps::TILE_SIZE, Maps::TILE_SIZE)
+  
+    for point in results do
+      # is point in requested tile?
+      if point.in?(bounding_box)
+        # draw star at position
+        x, y = point.pixel(bounding_box)
+        star(canvas, x, y, PNG::Color::Red)
+      end
+    end
+    
+    # dump png
+    image = PNG.new(canvas).to_blob
+  end
+
   image
 end

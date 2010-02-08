@@ -35,6 +35,7 @@ module Maps
       @top, @left, @bottom, @right = top, left, bottom, right
     end
     
+    # returns array of top, left, bottom, right
     def coords
       [@top, @left, @bottom, @right]
     end
@@ -44,7 +45,7 @@ module Maps
       [(@right - @left) / 2, (@bottom - @top) / 2]
     end
 
-    # returns lat/lnt of coords
+    # returns lat/lnt of bounding box
     def center
       [@left + (@right - @left) / 2, @top + (@bottom - @top) / 2]
     end
