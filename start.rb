@@ -33,7 +33,7 @@ end
 # returns array with width and height of sspn
 def coords2sspn(coords)
   top, left, bottom, right = coords
-  [right - left, bottom - top]
+  [(right - left) / 2, (bottom - top) / 2]
 end
 
 # returns lat/lnt of coords
