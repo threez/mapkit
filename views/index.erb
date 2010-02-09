@@ -23,11 +23,15 @@
 		
 		<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAnfs7bKE82qgb3Zc2YyS-oBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSySz_REpPq-4WZA27OwgbtyR3VcA&sensor=false&hl=de"
             type="text/javascript"></script>
+    <script src="jquery.js" type="text/javascript"></script>
     <script type="text/javascript">
       var map = null, 
           inovex_hq = null,
           inovex_hq_marker = null,
-          rubylayer = null;
+          rubylayer = null,
+          $map = null,
+          map_width = null,
+          map_height = null;
       var inovex_text = "<img src='http://www.inovex.de/images/inovex_logo.gif'><br/><b>Here is the inovex <u>HQ</u></b><br/><br/><a href='http://inovex.de'>inovex</a>";
       var aral = new GLatLng(48.901,8.666);
       var aral_marker = new GMarker(aral);
@@ -49,9 +53,24 @@
         });
       }
       
+      function checkPosition(event) {
+        if (event) {
+          var map_left = $map.position().left,
+              map_top = $map.position().top,
+              x = (event.pageX - map_left),
+              y = (event.pageY - map_top),
+              latlng = map.fromContainerPixelToLatLng(new GPoint(x, y));
+          $("#position").html(latlng.lat() + ", " + latlng.lng());
+        }
+      }
+      
       function initialize() {
         if (GBrowserIsCompatible()) {
           map = new GMap2(document.getElementById("map"));
+          $map = $("#map");
+          map_width = $map.width();
+          map_height = $map.height();
+          $map.mousemove(checkPosition);
           
           // world bounds
           var world = new GLatLngBounds(new GLatLng(180, -90), new GLatLng(-180, 90));
@@ -62,18 +81,22 @@
           copyrights.addCopyright(right);
           
           // new layer
-          rubylayer = new GTileLayerOverlay(
-            new GTileLayer(copyrights, 0, 21, {
-              tileUrlTemplate: "{Z}/{X}/{Y}.png", 
-              isPng: true,
-              opacity: 1
-            })
-          );
+          var layer = new GTileLayer(copyrights, 0, 21, {
+            //tileUrlTemplate: "{Z}/{X}/{Y}.png", 
+            isPng: true,
+            opacity: 1
+          });
+          
+          layer.getTileUrl = function(tile, zoom) {
+            return "" + zoom + "/" + tile.x + "/" + tile.y + ".png";
+          }
+          
+          rubylayer = new GTileLayerOverlay(layer);
+          
+          map.setCenter(inovex_hq, 14);
         
           map.addOverlay(inovex_hq_marker);
           map.addOverlay(aral_marker);
-          
-          map.setCenter(inovex_hq, 14);
           map.addControl(new GLargeMapControl());
           map.addControl(new GMapTypeControl());
         
@@ -93,12 +116,13 @@
   <body onload="start()" onunload="GUnload()">
 		<div id="box">
 			<h3 id="title">VARTA Guide 2.1</h3>
+			<h2 id="position"></h2>
 			
     	<ul id="list">
         <li><a href="#" onClick="displayAndCenter(map, inovex_hq, inovex_text);">inovex HQ</a></li>
         <li><a href="#" onClick="displayAndCenter(map, aral, aral_text);">Aral</a></li>
     	</ul>
-    	<div id="map"></div>
+    	<div id="map" onMouseOver="checkPosition()"></div>
 		</div>
 		
 	</body>

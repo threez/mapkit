@@ -107,13 +107,13 @@ module Maps
     lng = (mx / ORIGIN_SHIFT) * 180.0
     lat = (my / ORIGIN_SHIFT) * 180.0
 
-    lat = 180 / Math::PI * (2 * Math.atan( Math.exp( lat * RADIANT)) - HALF_PI)
+    lat = 180 / Math::PI * (2 * Math.atan(Math.exp(lat * RADIANT)) - HALF_PI)
     [lat, lng]
   end
 
   # converts pixel coordinates in given zoom level of pyramid to EPSG:900913
   def self.pixels2meters(px, py, zoom)
-    res = resolution( zoom )
+    res = resolution(zoom)
     mx = px * res - ORIGIN_SHIFT
     my = py * res - ORIGIN_SHIFT
     [mx, my]
