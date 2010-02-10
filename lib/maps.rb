@@ -1,24 +1,44 @@
 module Maps
+  # consant for radiants
   RADIANT = Math::PI / 180.0
-  TILE_SIZE = 256
-  EARTH_RADIUS = 6_378_137 # meters
-  MIN_LATITUDE = -85.05112877
-  MAX_LATITUDE = 85.05112877
-  MIN_LONGITUDE = -180
-  MAX_LONGITUDE = 180
-  RESOLUTION = 2 * Math::PI * EARTH_RADIUS / TILE_SIZE # meters per pixel
   
+  # the size of tiles in google maps
+  TILE_SIZE = 256
+  
+  # the constant earth radius in meters
+  EARTH_RADIUS = 6_378_137
+  
+  # the min latitude based on the mercator projection
+  MIN_LATITUDE = -85.05112877
+  
+  # the max latitude based on the mercator projection
+  MAX_LATITUDE = 85.05112877
+  
+  # the min longitude based on the mercator projection
+  MIN_LONGITUDE = -180
+  
+  # the max longitude based on the mercator projection
+  MAX_LONGITUDE = 180
+  
+  # the resolution in meters per pixel
+  RESOLUTION = 2 * Math::PI * EARTH_RADIUS / TILE_SIZE
+  
+  # version
+  VERSION = "0.0.1"
+  
+  # The class represents an lat/lng point
   class Point
     attr_accessor :lat, :lng
   
+    # initializes a point object using latitude and longitude
     def initialize(lat, lng)
       @lat, @lng = lat, lng
     end
     
-    # returns true if point is in bounding_box
+    # returns true if point is in bounding_box, false otherwise
     def in?(bounding_box)
       top, left, bottom, right = bounding_box.coords
-      (left..right) === lat && (top..bottom) === lng
+      (left..right) === @lng && (bottom..top) === @lat
     end
     
     # returns relative x and y for point in bounding_box
@@ -30,26 +50,38 @@ module Maps
     end
   end
   
+  # The class represents a bounding box specified by a top/left point and a 
+  # bottom/right point (the coordinates can be pixels or degrees)
   class BoundingBox
     attr_accessor :top, :left, :bottom, :right, :zoom
     
+    # initialize the bounding box using the positions of two points and a 
+    # optional zoom level
+    #
+    #             top
+    #        left o------+
+    #             |      |
+    #             |      |
+    #             +------o right
+    #                    bottom
+    #
     def initialize(top, left, bottom, right, zoom = nil)
       @top, @left, @bottom, @right, @zoom = top, left, bottom, right, zoom
     end
     
-    # returns array of top, left, bottom, right
+    # returns array of [top, left, bottom, right]
     def coords
       [@top, @left, @bottom, @right]
     end
 
-    # returns array with width and height of sspn
+    # returns array of [width, height] of sspn
     def sspn
-      [(@right - @left) / 2, (@bottom - @top) / 2]
+      [(@right - @left) / 2, (@top - @bottom) / 2]
     end
 
-    # returns lat/lnt of bounding box
+    # returns [lat, lnt] of bounding box
     def center
-      [@left + (@right - @left) / 2, @top + (@bottom - @top) / 2]
+      [@left + (@right - @left) / 2, @top + (@top - @bottom) / 2]
     end
     
     # grow bounding box by percentage
@@ -62,7 +94,7 @@ module Maps
       @right += lng
     end
     
-    # grow bounding box by percentage and return new bounding box
+    # grow bounding box by percentage and return new bounding box object
     def grow(percent)
       copy = self.clone
       copy.grow!(percent)
@@ -76,7 +108,8 @@ module Maps
     BoundingBox.new(top, left, bottom, right, zoom)
   end
 
-  # returns bounds [top, left, bottom, right] of the given tile in WGS-94 coordinates
+  # returns bounds [top, left, bottom, right] of the given tile 
+  # in WGS-94 coordinates
   def self.tile_bounds(tile_x, tile_y, zoom)
     pixel_x, pixel_y = tile2pixel(tile_x, tile_y)
     top, left = pixel2latlng(pixel_x, pixel_y, zoom)
@@ -87,7 +120,7 @@ module Maps
     [top, left, bottom, right]
   end
   
-  # shifts lat/lng uning the passed pixels
+  # returns [lat, lng] shifted using the passed pixels and zoom
   def self.shift_latlng(lat, lng, shift_x, shift_y, zoom)
     pixel_x, pixel_y = latlng2pixel(lat.to_f, lng.to_f, zoom)
     pixel_x, pixel_y = pixel_x + shift_x, pixel_y + shift_y
@@ -122,6 +155,8 @@ module Maps
     [lat, lng]
   end
 
+  # returns the passed value in case it is in the passed range or the 
+  # bounding min or max value 
   def self.clip(val, min, max)
     (val < min) ? min : (val > max) ? max : val
   end
