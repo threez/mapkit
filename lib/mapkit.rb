@@ -1,4 +1,4 @@
-module Maps
+module MapKit
   # consant for radiants
   RADIANT = Math::PI / 180.0
   
@@ -23,7 +23,7 @@ module Maps
   # the resolution in meters per pixel
   RESOLUTION = 2 * Math::PI * EARTH_RADIUS / TILE_SIZE
   
-  # version
+  # version of MapKit
   VERSION = "0.0.1"
   
   # The class represents an lat/lng point
@@ -38,7 +38,7 @@ module Maps
     # returns true if point is in bounding_box, false otherwise
     def in?(bounding_box)
       top, left, bottom, right = bounding_box.coords
-      (left..right) === @lng && (bottom..top) === @lat
+      (left..right) === @lng && (top..bottom) === @lat
     end
     
     # returns relative x and y for point in bounding_box
@@ -76,12 +76,12 @@ module Maps
 
     # returns array of [width, height] of sspn
     def sspn
-      [(@right - @left) / 2, (@top - @bottom) / 2]
+      [(@right - @left) / 2, (@bottom - @top) / 2]
     end
 
     # returns [lat, lnt] of bounding box
     def center
-      [@left + (@right - @left) / 2, @top + (@top - @bottom) / 2]
+      [@left + (@right - @left) / 2, @top + (@bottom - @top) / 2]
     end
     
     # grow bounding box by percentage
