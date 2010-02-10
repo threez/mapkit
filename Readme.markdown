@@ -13,14 +13,14 @@ of googles.
 The system is very simple. You have to add a new Layer to your Google Maps that
 request a tile with X, Y and Z like this:
 
-  var layer = new GTileLayer(null, 0, 21, {
-    isPng: true,
-    opacity: 1
-  });
-  layer.getTileUrl = function(tile, zoom) {
-    return "" + zoom + "/" + tile.x + "/" + tile.y + ".png";
-  }
-  map.addOverlay(new GTileLayerOverlay(layer));
+    var layer = new GTileLayer(null, 0, 21, {
+      isPng: true,
+      opacity: 1
+    });
+    layer.getTileUrl = function(tile, zoom) {
+      return "" + zoom + "/" + tile.x + "/" + tile.y + ".png";
+    }
+    map.addOverlay(new GTileLayerOverlay(layer));
   
 Once this is done, google starts to request tiles from your server. To
 implement the server you need to decode X (tile x), Y (tile y) and 
@@ -28,5 +28,28 @@ Z (zoom level) to a bounding box of latitude and longitude so that you can
 check what to draw in the tile that was requested. After you have fetched some
 points you have to draw them in the Tile. This is where TileKit comes into play.
 TileKit relies on gd2 a well known image rendering library (http://libgd.org).
+  
+    # this example assumes that a request with x, y and z was done
+    # by the browser and saved into x, y, z
 
-To get an overview on the whole story checkout the sample application.
+    POI = TileKit::Icon.new("images/poi.png", [20, 20], [3, 20], [0, 0, 20, 17])
+    bounding_box = MapKit.bounding_box(x, y, z)
+
+    # search for points_of_interest in a bigger bouning box (grow by 10%)
+    points = DB.points(bounding_box.grow(10))
+
+    unless points.empty?
+      # cerate tile
+      tile = TileKit::Image.new(bounding_box)
+  
+      # draw icons at point positions
+      for point in points do
+        tile.draw_icon(point, POI)
+      end
+  
+      # return tile
+      return tile.png
+    end
+
+To get an overview on the whole story checkout the sample application in the
+example directory. It requires json, sequel, sqlite3 and sinatra.
