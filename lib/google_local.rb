@@ -1,13 +1,14 @@
-require 'rubygems'
+require File.dirname(__FILE__) + "/mapkit"
 require 'httparty'
-require 'maps'
 
-class Google
+# Class for searching with the google local search
+class GoogleLocal
   include HTTParty
   base_uri "www.google.com"
   default_params :hl => :de, :v => "1.0", :rsz => :large
   format :json
   
+  # searches a term near point with sspn (span in degrees)
   def self.search(term, point, sspn)
     resp = get("/uds/GlocalSearch", :query => { :q => term, 
     :sll => point.join(","), :sspn => sspn.join(",") })
@@ -18,12 +19,14 @@ class Google
     end
   end
   
+  # just searches a term in a bounding box and returns points
   def self.search_in_bounding_box(term, bounding_box)
     crawl(term, bounding_box.center, bounding_box.sspn).map do |i| 
-      Maps::Point.new(i["lng"].to_f, i["lat"].to_f)
+      MapKit::Point.new(i["lat"].to_f, i["lng"].to_f)
     end
   end
   
+  # searches a term near point with sspn (span in degrees)
   def self.crawl(term, point, sspn)
     print " - crawl for '#{term}' at #{point.inspect} within #{sspn.inspect} ("
     count = 0
@@ -43,30 +46,14 @@ class Google
     print ") results: #{count}\n"
   end
   
-  def self.crawl_region(term, point, span, n = 10, &block)
+  # searches a term near point with sspn (span in degrees) n times n
+  def self.crawl_region(term, point, span, n = 10, &block) # :yields: data
     half_span = span / 2
     n.times do |x|
       n.times do |y|
         point = [point[0] + x * half_span, point[1] + y * half_span]
         crawl(term, point, [half_span, half_span], &block)
       end
-    end
-  end
-  
-  def self.crawl_region_to_file(filename, term, point, span, n = 10)
-    File.open("test.data", "w") do |f| 
-      Google.crawl_region(term, point, span, n) do |row|
-        d = ([row['lat'], row['lng'], row['title']] + row["addressLines"])
-        f.write(d.join("|") + "\n")
-      end
-    end
-  end
-  
-  def self.crawl_region_to_db(dataset, term, point, span, n = 10)
-    Google.crawl_region(term, point, span, n) do |row|
-      address, city = row["addressLines"]
-      dataset.insert(:lat => row['lat'].to_f, :lng => row['lng'].to_f,
-                     :title => row['title'], :address => address, :city => city)
     end
   end
 end

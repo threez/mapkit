@@ -1,3 +1,4 @@
+# Module to create tile for the google maps tile overlay
 module MapKit
   # consant for radiants
   RADIANT = Math::PI / 180.0
