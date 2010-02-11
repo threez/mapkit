@@ -6,7 +6,7 @@ module TileKit
     attr_reader :image, :size
     
     def initialize(path, size, peak_position, clickable_area)
-      @image = GD2::Image.import("images/gas.png")
+      @image = GD2::Image.import(path)
       @size_x, @size_y = size
       @peak_x, @peak_y = peak_position
       @shift_x, @shift_y, @width, @height = clickable_area
