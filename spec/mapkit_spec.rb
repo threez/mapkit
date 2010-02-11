@@ -45,9 +45,9 @@ describe MapKit::BoundingBox do
   
   it "should calculate the releative center position" do
     box = MapKit::BoundingBox.new(0, 0, 2, 2)
-    box.sspn.should == [1, 1]
+    box.center.should == [1, 1]
     box = MapKit::BoundingBox.new(5, 5, 15, 15)
-    box.sspn.should == [5, 5]
+    box.center.should == [10, 10]
   end
   
   it "should grow the box by percent correctly" do
