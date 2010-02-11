@@ -25,7 +25,7 @@ module MapKit
   RESOLUTION = 2 * Math::PI * EARTH_RADIUS / TILE_SIZE
   
   # version of MapKit
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
   
   # The class represents an lat/lng point
   class Point
