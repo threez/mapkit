@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{mapkit}
-  s.version = "0.0.1"
+  s.version = "0.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.3.5") if s.respond_to? :required_rubygems_version=
   s.authors = ["Vincent Landgraf"]
-  s.date = %q{2010-02-10}
+  s.date = %q{2010-02-11}
   s.description = %q{MapKit is an set of helpers to assist building tiles for
   the google maps web client}
   s.email = ["vincent.landgraf@inovex.de"]

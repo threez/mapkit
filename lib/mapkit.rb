@@ -25,7 +25,7 @@ module MapKit
   RESOLUTION = 2 * Math::PI * EARTH_RADIUS / TILE_SIZE
   
   # version of MapKit
-  VERSION = "0.0.2"
+  VERSION = "0.0.3"
   
   # The class represents an lat/lng point
   class Point
@@ -45,9 +45,12 @@ module MapKit
     # returns relative x and y for point in bounding_box
     def pixel(bounding_box)
       top, left, bottom, right = bounding_box.coords
-      ws = (right - left) / TILE_SIZE
-      hs = (bottom - top) / TILE_SIZE
-      [((@lng - left) / ws).to_i, ((@lat - top) / hs).to_i]
+      ws = bounding_box.width / TILE_SIZE
+      hs = bounding_box.height / TILE_SIZE
+      shift_lng = (@lng > 0) ? (@lng - left) : (left - @lng)
+      shift_lat = (@lat > 0) ? (top - @lat) : (@lat - top)
+      
+      [(shift_lng.abs / ws).to_i, (shift_lat.abs / hs).to_i]
     end
   end
   
@@ -74,21 +77,31 @@ module MapKit
     def coords
       [@top, @left, @bottom, @right]
     end
+    
+    # returns the width of the bounding box in degrees
+    def width
+      @right - @left
+    end
+    
+    # returns the height of the bounding box in degrees
+    def height
+      @top - @bottom
+    end
 
     # returns array of [width, height] of sspn
     def sspn
-      [(@right - @left) / 2, (@bottom - @top) / 2]
+      [width / 2, height / 2]
     end
 
     # returns [lat, lnt] of bounding box
     def center
-      [@left + (@right - @left) / 2, @top + (@bottom - @top) / 2]
+      [@left + width / 2, @bottom + height / 2]
     end
     
     # grow bounding box by percentage
     def grow!(percent)
-      lng = percent * ((@right - @left) / 100)
-      lat = percent * ((@top - @bottom) / 100)
+      lng = ((100.0 + percent) * (width / 2.0 / 100.0)) / 2.0
+      lat = ((100.0 + percent) * (height / 2.0 / 100.0)) / 2.0
       @top += lat
       @left -= lng
       @bottom -= lat

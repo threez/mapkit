@@ -23,7 +23,16 @@ describe MapKit::Point do
   
   it "should be able to calc relative positions based on the bounding box" do
     point = MapKit::Point.new(45, 45)
-    box = MapKit::BoundingBox.new(40.0, 40.0, 50.0, 50.0)
+    box = MapKit::BoundingBox.new(50.0, 40.0, 40.0, 50.0)
+    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point = MapKit::Point.new(-45, -45)
+    box = MapKit::BoundingBox.new(-40.0, -50.0, -50.0, -40.0)
+    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point = MapKit::Point.new(0, 0)
+    box = MapKit::BoundingBox.new(10.0, -10.0, -10.0, 10.0)
+    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point = MapKit::Point.new(-20, 0)
+    box = MapKit::BoundingBox.new(-10.0, -10.0, -30.0, 10.0)
     point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
   end
 end
@@ -39,24 +48,24 @@ describe MapKit::BoundingBox do
   end
   
   it "should calculate the span" do
-    box = MapKit::BoundingBox.new(0, 0, 3.0, 3.0)
+    box = MapKit::BoundingBox.new(3.0, 0, 0, 3.0)
     box.sspn.should == [1.5, 1.5]
   end
   
   it "should calculate the releative center position" do
-    box = MapKit::BoundingBox.new(0, 0, 2, 2)
+    box = MapKit::BoundingBox.new(2, 0, 0, 2)
     box.center.should == [1, 1]
-    box = MapKit::BoundingBox.new(5, 5, 15, 15)
+    box = MapKit::BoundingBox.new(15, 5, 5, 15)
     box.center.should == [10, 10]
   end
   
   it "should grow the box by percent correctly" do
-    box = MapKit::BoundingBox.new(0.0, 0.0, 2.0, 2.0)
+    box = MapKit::BoundingBox.new(4.0, 2.0, 2.0, 4.0)
     box.grow!(100)
-    box.coords.should == [-2, -2, 4, 4]
+    box.coords.should == [5.0, 1.0, 1.0, 5.0]
     new_box = box.grow(100)
-    new_box.coords.should == [-8, -8, 10, 10]
-    box.coords.should == [-2, -2, 4, 4]
+    new_box.coords.should == [7.0, -1.0, -1.0, 7.0]
+    box.coords.should == [5.0, 1.0, 1.0, 5.0]
   end
 end
 
