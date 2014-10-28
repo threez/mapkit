@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + "/mapkit"
-require "gd2"
+require 'RMagick' unless defined? Magick
 
 # this module helps drawing icons on tile images
 module TileKit
@@ -15,7 +15,7 @@ module TileKit
     # peak_position:: the peak position as array [x, y]
     # clickable_area:: the clickable area of the icon as array [top, left, bottom, right]
     def initialize(path, size, peak_position, clickable_area)
-      @image = GD2::Image.import(path)
+      @image = Magick::Image.read(path)[0]
       @size_x, @size_y = size
       @peak_x, @peak_y = peak_position
       @shift_x, @shift_y, @width, @height = clickable_area
@@ -27,7 +27,7 @@ module TileKit
       x, y = x - @peak_x, y - @peak_y
       
       # copy image
-      canvas.copy_from(@image, x, y, 0, 0, @size_x, @size_y)
+      canvas.composite!(@image, Magick::ForgetGravity, x, y, Magick::CopyCompositeOp)
     end
     
     # returns a boundingbox (with lat/lng) that contains the bounds of the
@@ -48,26 +48,22 @@ module TileKit
     def initialize(bounding_box)
       @bounding_box = bounding_box
       
-      # create image canvas
-      @canvas = GD2::Image.new(MapKit::TILE_SIZE, MapKit::TILE_SIZE)
-
-      # make image transparent
-      @canvas.save_alpha = true
-      @canvas.draw do |context|
-        context.color = GD2::Color::TRANSPARENT
-        context.fill
+      # create transparent image canvas
+      @canvas = Magick::Image.new(MapKit::TILE_SIZE, MapKit::TILE_SIZE) do |c|
+        c.background_color= "Transparent"
       end
     end
     
     # draws passed icon at passed position
     def draw_icon(point, icon)
       x, y = point.pixel(@bounding_box)
+      Rails.logger.debug "icon_x:#{x} icon_y:#{y}"
       icon.draw(@canvas, x, y)
     end
 
     # returns the png binary string of the image
     def png
-      @canvas.png
+      @canvas.to_blob { |attrs| attrs.format = 'PNG' }
     end
   end
 end
