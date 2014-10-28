@@ -44,13 +44,9 @@ module MapKit
     
     # returns relative x and y for point in bounding_box
     def pixel(bounding_box)
-      top, left, bottom, right = bounding_box.coords
-      ws = bounding_box.width / TILE_SIZE
-      hs = bounding_box.height / TILE_SIZE
-      shift_lng = (@lng > 0) ? (@lng - left) : (left - @lng)
-      shift_lat = (@lat > 0) ? (top - @lat) : (@lat - top)
-      
-      [(shift_lng.abs / ws).to_i, (shift_lat.abs / hs).to_i]
+      x, y = MapKit.latlng2pixel(@lat, @lng, bounding_box.zoom)
+      tile_x, tile_y = MapKit.latlng2pixel(bounding_box.top, bounding_box.left, bounding_box.zoom)
+      [x-tile_x, y-tile_y]
     end
   end
   
