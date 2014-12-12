@@ -1,4 +1,4 @@
-var map = null, 
+var map = null,
     inovex_hq = null,
     inovex_hq_marker = null,
     points_of_interest = new Array(),
@@ -20,7 +20,7 @@ function start() {
   ggeo.getLatLng("Karlsruherstr. 71, Pforzheim", function(point) {
     inovex_hq = point;
     inovex_hq_marker = new GMarker(inovex_hq);
-    
+
     initialize();
   });
 }
@@ -44,7 +44,7 @@ function updatePointsOfInterest() {
       bound.address = results[i][5];
       bound.city = results[i][6];
       bound.poi_point = new GLatLng(results[i][7], results[i][8]);
-      
+
       points_of_interest.push(bound);
     }
   });
@@ -53,7 +53,7 @@ function updatePointsOfInterest() {
 function initialize() {
   if (GBrowserIsCompatible()) {
     map = new GMap2(document.getElementById("map"));
-    
+
     // new layer
     var layer = new GTileLayer(null, 0, 21, {
       isPng: true,
@@ -62,26 +62,26 @@ function initialize() {
     layer.getTileUrl = function(tile, zoom) {
       return "" + zoom + "/" + tile.x + "/" + tile.y + ".png";
     }
-    
-    map.setCenter(inovex_hq, 14);
-  
+
+    map.setCenter(inovex_hq, 12);
+
     map.addOverlay(inovex_hq_marker);
     map.addOverlay(aral_marker);
     map.addControl(new GLargeMapControl());
     map.addControl(new GMapTypeControl());
     map.enableScrollWheelZoom();
-  
+
     GEvent.addListener(inovex_hq_marker, "click", function() {
       displayAndCenter(map, inovex_hq, inovex_text);
     });
-  
+
     GEvent.addListener(aral_marker, "click", function() {
       displayAndCenter(map, aral, aral_text);
     });
-    
+
     GEvent.addListener(map, "click",
       function(overlay, latlng, overlaylatlng) {
-        
+
       for (var i = 0; i < points_of_interest.length; i++) {
         if (points_of_interest[i].contains(latlng)) {
           map.openInfoWindowHtml(points_of_interest[i].poi_point,
@@ -92,7 +92,7 @@ function initialize() {
         }
       }
     });
-    
+
     GEvent.addListener(map, "mousemove", function(latlng) {
       var found_one = false;
       for (var i = 0; i < points_of_interest.length; i++) {
@@ -105,9 +105,9 @@ function initialize() {
       }
       if (!found_one) $map_divs.css("cursor", "move");
     });
-    
+
     GEvent.addListener(map, "moveend", updatePointsOfInterest);
-    
+
     map.addOverlay(new GTileLayerOverlay(layer));
     updatePointsOfInterest();
   }

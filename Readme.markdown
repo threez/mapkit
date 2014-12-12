@@ -1,4 +1,4 @@
-## MapKit & TileKit
+# MapKit & TileKit
 
 MapKit and TileKit are tools to help you develop a tile rendering service in
 ruby. If you need to draw many markers in google maps then the performance
@@ -21,14 +21,14 @@ request a tile with X, Y and Z like this:
       return "" + zoom + "/" + tile.x + "/" + tile.y + ".png";
     }
     map.addOverlay(new GTileLayerOverlay(layer));
-  
+
 Once this is done, google starts to request tiles from your server. To
-implement the server you need to decode X (tile x), Y (tile y) and 
+implement the server you need to decode X (tile x), Y (tile y) and
 Z (zoom level) to a bounding box of latitude and longitude so that you can
 check what to draw in the tile that was requested. After you have fetched some
 points you have to draw them in the Tile. This is where TileKit comes into play.
-TileKit relies on gd2 a well known image rendering library (http://libgd.org).
-  
+TileKit relies on rmagick a well known image rendering library.
+
     # this example assumes that a request with x, y and z was done
     # by the browser and saved into x, y, z
 
@@ -41,15 +41,27 @@ TileKit relies on gd2 a well known image rendering library (http://libgd.org).
     unless points.empty?
       # cerate tile
       tile = TileKit::Image.new(bounding_box)
-  
+
       # draw icons at point positions
       for point in points do
         tile.draw_icon(point, POI)
       end
-  
+
       # return tile
       return tile.png
     end
 
 To get an overview on the whole story checkout the sample application in the
 example directory. It requires json, sequel, sqlite3 and sinatra.
+
+## Get started with an example
+
+To try the example do the following, clone the git repository:
+
+    cd mapkit
+    bundle
+    cd example
+    ruby start.rb
+
+Then go to the webbrowser at http://localhost:4567/ and try it out. You will
+see, how the tiles are rendered from the small sqlite database using rmagick.

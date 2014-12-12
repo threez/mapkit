@@ -6,7 +6,7 @@ module TileKit
   # this class represents an icon that can be drawn on an Image
   class Icon
     attr_reader :image, :size
-    
+
     # initializes the icon with a path, image size [width, height], the peak#
     # position (where the pointer should be placed) [x, y] and a bounding box
     # that represents a clickable area
@@ -20,16 +20,16 @@ module TileKit
       @peak_x, @peak_y = peak_position
       @shift_x, @shift_y, @width, @height = clickable_area
     end
-    
+
     # draws the icon on the canvas at passed position (x, y)
     def draw(canvas, x, y)
       # position icon at peak point
       x, y = x - @peak_x, y - @peak_y
-      
+
       # copy image
       canvas.composite!(@image, Magick::ForgetGravity, x, y, Magick::CopyCompositeOp)
     end
-    
+
     # returns a boundingbox (with lat/lng) that contains the bounds of the
     # image for the passed position
     def bounding_box(lat, lng, zoom)
@@ -38,26 +38,25 @@ module TileKit
       MapKit::BoundingBox.new(top, left, bottom, right, zoom)
     end
   end
-  
+
   # this image class represents a tile in the google maps
   class Image
     attr_reader :canvas, :bounding_box
-    
+
     # initialize the image with a (lat/lng) bounding box of the tile it
     # represents
     def initialize(bounding_box)
       @bounding_box = bounding_box
-      
+
       # create transparent image canvas
       @canvas = Magick::Image.new(MapKit::TILE_SIZE, MapKit::TILE_SIZE) do |c|
         c.background_color= "Transparent"
       end
     end
-    
+
     # draws passed icon at passed position
     def draw_icon(point, icon)
       x, y = point.pixel(@bounding_box)
-      Rails.logger.debug "icon_x:#{x} icon_y:#{y}"
       icon.draw(@canvas, x, y)
     end
 

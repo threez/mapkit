@@ -1,10 +1,11 @@
-<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN" 
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 		<title>Example Google Maps Application</title>
-		<style type="text/css" media="screen"><!--
+		<style type="text/css" media="screen">
+        <!--
 		  body { background: url(images/gradient.jpg) repeat-x; }
 			#box { width: 800px; margin: 18px auto 0; }
 			#title { width: 800px; margin: 0px; padding: 30px 0px 30px 0px; }
@@ -18,21 +19,21 @@
 			h3 { color: #666; font-size: 60px; font-family: "Lucida Grande", Arial, sans-serif; font-weight: bold; text-align: center; letter-spacing: -1px; width: auto; }
 			h4 { font-weight: bold; text-align: center; margin: 1.33em 0; }
 			a { color: #666; text-decoration: underline; }
-		--></style>
-		
+		-->
+        </style>
 		<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAnfs7bKE82qgb3Zc2YyS-oBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxSySz_REpPq-4WZA27OwgbtyR3VcA&sensor=false&hl=de"
-            type="text/javascript"></script>
-    <script src="jquery.js" type="text/javascript"></script>        
-    <script src="appication.js" type="text/javascript"></script>
+                type="text/javascript"></script>
+        <script src="jquery.js" type="text/javascript"></script>
+        <script src="appication.js" type="text/javascript"></script>
 	</head>
   <body onload="start()" onunload="GUnload()">
 		<div id="box">
 			<h3 id="title">Example Google Maps Application</h3>
-    	<ul id="list">
-        <li><a href="#" onClick="displayAndCenter(map, inovex_hq, inovex_text);">inovex HQ</a></li>
-        <li><a href="#" onClick="displayAndCenter(map, aral, aral_text);">Aral</a></li>
-    	</ul>
-    	<div id="map"></div>
+    	    <ul id="list">
+                <li><a href="#" onClick="displayAndCenter(map, inovex_hq, inovex_text);">inovex HQ</a></li>
+                <li><a href="#" onClick="displayAndCenter(map, aral, aral_text);">Aral</a></li>
+    	    </ul>
+    	    <div id="map"></div>
 		</div>
 	</body>
 </html>

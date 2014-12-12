@@ -10,7 +10,7 @@ describe MapKit::Point do
     point.lat.should == 10
     point.lng.should == 15
   end
-  
+
   it "should be able to check if it is in a bounding box" do
     point0 = MapKit::Point.new(45, 45)
     point1 = MapKit::Point.new(60, 45)
@@ -20,20 +20,20 @@ describe MapKit::Point do
     point1.in?(box).should == false
     point2.in?(box).should == false
   end
-  
+
   it "should be able to calc relative positions based on the bounding box" do
     point = MapKit::Point.new(45, 45)
     box = MapKit::BoundingBox.new(50.0, 40.0, 40.0, 50.0)
-    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point.pixel(box).should == [4, 5]
     point = MapKit::Point.new(-45, -45)
     box = MapKit::BoundingBox.new(-40.0, -50.0, -50.0, -40.0)
-    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point.pixel(box).should == [4, 5]
     point = MapKit::Point.new(0, 0)
     box = MapKit::BoundingBox.new(10.0, -10.0, -10.0, 10.0)
-    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point.pixel(box).should == [7, 7]
     point = MapKit::Point.new(-20, 0)
     box = MapKit::BoundingBox.new(-10.0, -10.0, -30.0, 10.0)
-    point.pixel(box).should == [MapKit::TILE_SIZE / 2, MapKit::TILE_SIZE / 2]
+    point.pixel(box).should == [7, 8]
   end
 end
 
@@ -46,19 +46,19 @@ describe MapKit::BoundingBox do
     box.bottom.should == 3
     box.right.should == 4
   end
-  
+
   it "should calculate the span" do
     box = MapKit::BoundingBox.new(3.0, 0, 0, 3.0)
     box.sspn.should == [1.5, 1.5]
   end
-  
+
   it "should calculate the releative center position" do
     box = MapKit::BoundingBox.new(2, 0, 0, 2)
     box.center.should == [1, 1]
     box = MapKit::BoundingBox.new(15, 5, 5, 15)
     box.center.should == [10, 10]
   end
-  
+
   it "should grow the box by percent correctly" do
     box = MapKit::BoundingBox.new(4.0, 2.0, 2.0, 4.0)
     box.grow!(100)
@@ -101,20 +101,20 @@ describe MapKit do
     MapKit.resolution(20).round(4).should == 0.1493.round(4)
     MapKit.resolution(21).round(4).should == 0.0746.round(4)
   end
-  
+
   it "should calculate the map size" do
     MapKit.map_size(0).should == [256, 256]
     MapKit.map_size(10).should == [4 ** 9, 4 ** 9]
     MapKit.map_size(20).should == [4 ** 14, 4 ** 14]
   end
-  
+
   it "should calculate the tile xy to pixel xy and vice versa" do
     MapKit.pixel2tile(1024, 1024).should == [4, 4]
     MapKit.pixel2tile(0, 0).should == [0, 0]
     MapKit.tile2pixel(4, 4).should == [1024, 1024]
     MapKit.tile2pixel(0, 0).should == [0, 0]
   end
-  
+
   it "should clip correctly as defined by boundings" do
     MapKit.clip(45, 40, 50).should == 45
     MapKit.clip(45, 45, 50).should == 45
@@ -122,13 +122,13 @@ describe MapKit do
     MapKit.clip(45, 30, 40).should == 40
     MapKit.clip(45, 40, 45).should == 45
   end
-  
+
   it "should calculate the shift correctly" do
     lat, lng = MapKit.shift_latlng(47.99997, 8.00002, 20, 20, 14)
     lat.round(5).should == 47.99882
     lng.round(5).should == 8.00173
   end
-  
+
   it "should calc pixel to lat/lng and vice versa" do
     px, py = MapKit.latlng2pixel(47.99997, 8.00002, 14)
     px.should == 2_190_359
@@ -144,7 +144,7 @@ describe MapKit do
     bb.left.round(8).should == MapKit::MIN_LONGITUDE
     bb.bottom.round(8).should == -84.92832093
     bb.right.round(8).should == 178.59375
-    
+
     bb = MapKit.bounding_box(1024, 1024, 14)
     bb.top.round(8).should == 82.67628497
     bb.left.round(8).should == -157.5
